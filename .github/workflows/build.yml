@@ -1,0 +1,33 @@
+name: Build Shulker Dropper
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.1.1'
+
+      - name: Extract and build
+        run: |
+          ZIP="$(find . -maxdepth 1 -name '*.zip' | head -n 1)"
+          mkdir project
+          unzip "$ZIP" -d project
+          gradle -p project build --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShulkerDropper-JAR
+          path: project/build/libs/*.jar
